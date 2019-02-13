@@ -28,7 +28,7 @@ $DIRS = (Get-ChildItem $FoldersConfigPath -Directory) -as [string[]]
 $path = Split-Path -Parent $MyInvocation.MyCommand.Path
 Set-Location $path
 $FoldersConfigPathSplit = $FoldersConfigPath.Split("\")
-$fileName = $path + "\$($FoldersConfigPathSplit[$FoldersConfigPathSplit.Length-1]).csv"
+$fileName = $path + "\log\$($FoldersConfigPathSplit[$FoldersConfigPathSplit.Length-1]).csv"
 $file = New-Object System.IO.StreamWriter($fileName, $false, [System.Text.Encoding]::GetEncoding("sjis"))
 $file.Write("çHî‘,ê}ñ êî")
 foreach ($item in $TargetFolders) {
