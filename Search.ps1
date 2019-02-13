@@ -9,7 +9,7 @@ $fbd.Description = "対象ディレクトリを選択してください。"
 $fbd.SelectedPath = "\\192.168.0.170\supersub\図面Tiffデータ"
 
 # ダイアログを表示する
-# $target = $fbd.ShowDialog() | Out-Null
+$target = $fbd.ShowDialog() | Out-Null
 
 # 選択をキャンセルした場合はNULLを返す
 if ( $target -eq [System.Windows.Forms.DialogResult]::Cancel) {
@@ -21,15 +21,11 @@ else {
 
 Write-Host $targetPath
 
-# $FoldersConfigPath = $targetPath
-$FoldersConfigPath = "\\192.168.0.170\supersub\図面Tiffデータ\TOYOTA"
+$FoldersConfigPath = $targetPath
+# $FoldersConfigPath = "\\192.168.0.170\supersub\図面Tiffデータ\TOYOTA"
 $DIRS = (Get-ChildItem $FoldersConfigPath -Directory) -as [string[]]
-# メインの処理
-$errorMessage = ""
-$resultMessage = ""
-# Write-Host $DIRS.Contains("00007").ToString()
-# Write-Host $DIRS.Contains("00000").ToString()
 
+# メインの処理
 # 実行中のパス取得/移動
 $path = Split-Path -Parent $MyInvocation.MyCommand.Path
 Set-Location $path
@@ -62,7 +58,7 @@ foreach ($DIR in $DIRS) {
     $status = "CSV書き込み中"
     $ProgressRate = [Math]::Round(($Counter / $DIRS.Length) * 100, 2, [MidpointRounding]::AwayFromZero)
     Write-Progress $activity $status -PercentComplete $ProgressRate -CurrentOperation "$ProgressRate % 完了"
-    Start-Sleep -Milliseconds 50
+    Start-Sleep -Milliseconds 10
     $Counter++
     if ($DIR -eq "00020") {
         # break
