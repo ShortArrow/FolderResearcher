@@ -3,14 +3,14 @@
 # System.Windows.Formsを有効化
 [System.Reflection.Assembly]::LoadWithPartialName("System.windows.forms") | Out-Null
 
-# 必要な情報を設定
+# 基本設定
 $fbd = New-Object System.Windows.Forms.FolderBrowserDialog
 $fbd.Description = "対象ディレクトリを選択してください。" 
 $fbd.SelectedPath = "\\192.168.0.170\supersub\図面Tiffデータ"
+$TargetFolders = @("出図連絡書", "変更リスト", "仕様書")
 
 # ダイアログを表示する
 $target = $fbd.ShowDialog() | Out-Null
-
 # 選択をキャンセルした場合はNULLを返す
 if ( $target -eq [System.Windows.Forms.DialogResult]::Cancel) {
     $targetPath = $null
@@ -18,9 +18,7 @@ if ( $target -eq [System.Windows.Forms.DialogResult]::Cancel) {
 else {
     $targetPath = $fbd.SelectedPath 
 }
-
 Write-Host $targetPath
-
 $FoldersConfigPath = $targetPath
 # $FoldersConfigPath = "\\192.168.0.170\supersub\図面Tiffデータ\TOYOTA"
 $DIRS = (Get-ChildItem $FoldersConfigPath -Directory) -as [string[]]
@@ -29,35 +27,41 @@ $DIRS = (Get-ChildItem $FoldersConfigPath -Directory) -as [string[]]
 # 実行中のパス取得/移動
 $path = Split-Path -Parent $MyInvocation.MyCommand.Path
 Set-Location $path
-$fileName = $path + "\Log.csv"
+$FoldersConfigPathSplit = $FoldersConfigPath.Split("\")
+$fileName = $path + "\$($FoldersConfigPathSplit[$FoldersConfigPathSplit.Length-1]).csv"
 $file = New-Object System.IO.StreamWriter($fileName, $false, [System.Text.Encoding]::GetEncoding("sjis"))
-$file.WriteLine("""工番"",""出連フォルダ"",""変更リストフォルダ"",""仕様書フォルダ"",""図面数""")
+$file.Write("工番,図面数")
+foreach ($item in $TargetFolders) {
+    $file.Write(",$item")
+}
+$file.WriteLine("")
 $Counter = 1
 foreach ($DIR in $DIRS) {
     # $finderPath = ("FileSystem::$DIR") # dir $DIR/hoge.xlsx にすれば、hoge.xlsxファイルだけに絞れます
     $finderPath = $FoldersConfigPath + "\" + $DIR
     $Folders = (Get-ChildItem $finderPath -Directory -Depth 0) -as [string[]]
     $Files = (Get-ChildItem $finderPath -File -Depth 0 -Name) -as [string[]]
-    # 出図連絡書
-    $EjectDrawingSheetFolders = ($Folders -match "出図連絡書.*") -as [string[]]
-    $EjectDrawingSheetFoldersCount = $EjectDrawingSheetFolders.Length
-    # 変更リスト
-    $ChangeListFolders = ($Folders -match "変更リスト.*") -as [string[]]
-    $ChangeListFoldersCount = $ChangeListFolders.Length
-    # 仕様書
-    $SpecSheetFolders = ($Folders -match "仕様書.*") -as [string[]]
-    $SpecSheetFoldersCount = $SpecSheetFolders.Length
     # 図面
     $Drawings = ($Files -match ".+\.tif?") -as [string[]]
     $DrawingsCount = $Drawings.Length
-    
-
-    $file.WriteLine("""" + $DIR + """,""" + $EjectDrawingSheetFoldersCount + """,""" + $ChangeListFoldersCount + """,""" + $SpecSheetFoldersCount + """,""" + $DrawingsCount + """")
-    # Write-Host("$DIR,$EjectDrawingSheetFoldersCount,$ChangeListFoldersCount,$SpecSheetFoldersCount,$DrawingsCount")
+    $FolderCounters = @()
+    $FileCounters = @()
+    $file.Write("=""" + $DIR + """," + $DrawingsCount)
+    foreach ($item in $TargetFolders) {
+        $FolderCounters += $(($Folders -match "$item.*") -as [string[]]).Length
+        if (Test-Path ($finderPath + "\" + $item)) {
+            $FileCounters += $((Get-ChildItem ($finderPath + "\" + $item) -File -Depth 0 -Name) -as [string[]]).Length
+        }
+        else {
+            $FileCounters += 0
+        }
+        $file.Write("," + $item)
+    }
+    $file.WriteLine("")
     $activity = "図面TIFF内部　オートチェッカー"
     $status = "CSV書き込み中"
     $ProgressRate = [Math]::Round(($Counter / $DIRS.Length) * 100, 2, [MidpointRounding]::AwayFromZero)
-    Write-Progress $activity $status -PercentComplete $ProgressRate -CurrentOperation "$ProgressRate % 完了"
+    Write-Progress $activity $status -PercentComplete $ProgressRate -CurrentOperation "$ProgressRate%完了"
     Start-Sleep -Milliseconds 10
     $Counter++
     if ($DIR -eq "00020") {
