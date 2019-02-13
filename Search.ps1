@@ -32,7 +32,7 @@ $fileName = $path + "\$($FoldersConfigPathSplit[$FoldersConfigPathSplit.Length-1
 $file = New-Object System.IO.StreamWriter($fileName, $false, [System.Text.Encoding]::GetEncoding("sjis"))
 $file.Write("工番,図面数")
 foreach ($item in $TargetFolders) {
-    $file.Write(",$item")
+    $file.Write(",$($item)フォルダ,$($item)数")
 }
 $file.WriteLine("")
 $Counter = 1
@@ -55,7 +55,7 @@ foreach ($DIR in $DIRS) {
         else {
             $FileCounters += 0
         }
-        $file.Write("," + $item)
+        $file.Write("," + $FolderCounters + "," + $FileCounters)
     }
     $file.WriteLine("")
     $activity = "図面TIFF内部　オートチェッカー"
