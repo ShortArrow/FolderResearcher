@@ -44,18 +44,16 @@ foreach ($DIR in $DIRS) {
     # 図面
     $Drawings = ($Files -match ".+\.tif?") -as [string[]]
     $DrawingsCount = $Drawings.Length
-    $FolderCounters = @()
-    $FileCounters = @()
     $file.Write("=""" + $DIR + """," + $DrawingsCount)
     foreach ($item in $TargetFolders) {
-        $FolderCounters += $(($Folders -match "$item.*") -as [string[]]).Length
+        $FolderCounter = $(($Folders -match "$item.*") -as [string[]]).Length
         if (Test-Path ($finderPath + "\" + $item)) {
-            $FileCounters += $((Get-ChildItem ($finderPath + "\" + $item) -File -Depth 0 -Name) -as [string[]]).Length
+            $FileCounter = $((Get-ChildItem ($finderPath + "\" + $item) -File -Depth 0 -Name) -as [string[]]).Length
         }
         else {
-            $FileCounters += 0
+            $FileCounter = 0
         }
-        $file.Write("," + $FolderCounters + "," + $FileCounters)
+        $file.Write("," + $FolderCounter + "," + $FileCounter)
     }
     $file.WriteLine("")
     $activity = "図面TIFF内部　オートチェッカー"
