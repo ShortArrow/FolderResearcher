@@ -15,6 +15,7 @@ $fbd.SelectedPath = "\\192.168.0.170\supersub\図面Tiffデータ"
 $TargetFolders = @("出図連絡書", "変更リスト", "仕様書")
 
 # ダイアログを表示する
+Write-Host "フォルダ選択画面を作成しています。お待ちください。"
 $target = $fbd.ShowDialog() | Out-Null
 # 選択をキャンセルした場合はNULLを返す
 if ( $target -eq [System.Windows.Forms.DialogResult]::Cancel) {
@@ -23,7 +24,7 @@ if ( $target -eq [System.Windows.Forms.DialogResult]::Cancel) {
 else {
     $targetPath = $fbd.SelectedPath 
 }
-Write-Host $targetPath
+Write-Host "ターゲット→$targetPath"
 $FoldersConfigPath = $targetPath
 # $FoldersConfigPath = "\\192.168.0.170\supersub\図面Tiffデータ\TOYOTA"
 $DIRS = (Get-ChildItem $FoldersConfigPath -Directory) -as [string[]]
