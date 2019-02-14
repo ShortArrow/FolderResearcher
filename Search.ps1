@@ -56,8 +56,8 @@ foreach ($DIR in $DIRS) {
         $file.Write("," + $FolderCounter + "," + $FileCounter)
     }
     $file.WriteLine("")
-    $activity = "図面TIFF内部　オートチェッカー"
-    $status = "CSV書き込み中"
+    $activity = "図面TIFF内部　ファイル・フォルダ　リサーチ"
+    $status = "logフォルダに $($FoldersConfigPathSplit[$FoldersConfigPathSplit.Length-1]).csvを作成中"
     $ProgressRate = [Math]::Round(($Counter / $DIRS.Length) * 100, 2, [MidpointRounding]::AwayFromZero)
     Write-Progress $activity $status -PercentComplete $ProgressRate -CurrentOperation "$ProgressRate%完了"
     Start-Sleep -Milliseconds 10
