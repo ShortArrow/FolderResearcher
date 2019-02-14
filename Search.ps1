@@ -5,7 +5,7 @@
 
 # 基本設定
 $fbd = New-Object System.Windows.Forms.FolderBrowserDialog
-$fbd.Description = "客先名フォルダを選択してください。" 
+$fbd.Description = "図面TIFFフォルダから客先名フォルダを選択してください。" 
 $fbd.SelectedPath = "\\192.168.0.170\supersub\図面Tiffデータ"
 $TargetFolders = @("出図連絡書", "変更リスト", "仕様書")
 
