@@ -1,4 +1,9 @@
-# 複数フォルダを指定できる設計になっています(配列)。
+# PS version check
+if (($PSversionTable.PSVersion.Major -lt 5)) {
+    Write-Host "このバージョンのPowerShellには対応していません。`r`n" `
+                + "Version 5 以上をインストールしてください。"
+    exit
+}
 
 # System.Windows.Formsを有効化
 [System.Reflection.Assembly]::LoadWithPartialName("System.windows.forms") | Out-Null
