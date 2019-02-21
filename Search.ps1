@@ -12,6 +12,7 @@ if (($PSversionTable.PSVersion.Major -lt 5)) {
 $fbd = New-Object System.Windows.Forms.FolderBrowserDialog
 $fbd.Description = "図面TIFFフォルダから客先名フォルダを選択してください。" 
 $fbd.SelectedPath = "\\192.168.0.170\supersub\図面Tiffデータ"
+# $TargetFolders = @("出図連絡書", "変更リスト", "仕様書")
 $TargetFolders = @("出図連絡書", "変更リスト", "仕様書")
 
 # ダイアログを表示する
@@ -25,6 +26,7 @@ else {
     $targetPath = $fbd.SelectedPath 
 }
 Write-Host "ターゲット→$targetPath"
+Write-Host ""
 $FoldersConfigPath = $targetPath
 # $FoldersConfigPath = "\\192.168.0.170\supersub\図面Tiffデータ\TOYOTA"
 $DIRS = (Get-ChildItem $FoldersConfigPath -Directory) -as [string[]]
@@ -48,13 +50,17 @@ foreach ($DIR in $DIRS) {
     $Folders = (Get-ChildItem $finderPath -Directory -Depth 0) -as [string[]]
     $Files = (Get-ChildItem $finderPath -File -Depth 0 -Name) -as [string[]]
     # 図面
-    $Drawings = ($Files -match ".+\.tif?") -as [string[]]
+    $Drawings = (($Files -match ".+\.tif?") -as [string[]]) -as [string[]]
     $DrawingsCount = $Drawings.Length
     $file.Write("=""" + $DIR + """," + $DrawingsCount)
     foreach ($item in $TargetFolders) {
-        $FolderCounter = $(($Folders -match "$item.*") -as [string[]]).Length
+        $FolderCounter = ($Folders -match "$item.*").Length
         if (Test-Path ($finderPath + "\" + $item)) {
-            $FileCounter = $((Get-ChildItem ($finderPath + "\" + $item) -File -Depth 0 -Name) -as [string[]]).Length
+            if ($item -eq "変更リスト") {
+                $FileCounter = ($(((Get-ChildItem ($finderPath + "\" + $item) -File -Depth 1 -Name) -as [string[]]) -match ".+\.tif?") -as [string[]]).Length
+            }else{
+                $FileCounter = ($(((Get-ChildItem ($finderPath + "\" + $item) -File -Depth 0 -Name) -as [string[]]) -match ".+\.tif?") -as [string[]]).Length
+            }
         }
         else {
             $FileCounter = 0
@@ -65,7 +71,7 @@ foreach ($DIR in $DIRS) {
     $activity = "図面TIFF内部　ファイル・フォルダ　リサーチ"
     $status = "logフォルダに $($FoldersConfigPathSplit[$FoldersConfigPathSplit.Length-1]).csvを作成中"
     $ProgressRate = [Math]::Round(($Counter / $DIRS.Length) * 100, 2, [MidpointRounding]::AwayFromZero)
-    Write-Progress $activity $status -PercentComplete $ProgressRate -CurrentOperation "$ProgressRate%完了"
+    Write-Progress $activity $status -PercentComplete $ProgressRate -CurrentOperation $("進捗率"+$ProgressRate.ToString("00.00")+"%") 
     Start-Sleep -Milliseconds 10
     $Counter++
     if ($DIR -eq "00020") {
@@ -80,5 +86,5 @@ Add-Type -Assembly System.Windows.Forms | Out-Null
 #結果表示
 [void][System.Windows.Forms.MessageBox]::Show("Finish Research", "GF企画室")
 Write-Host
-Write-Host "Finished Please Input Any Key"
+Write-Host "Finished Please Input Any Key" -ForegroundColor Yellow -BackgroundColor Black
 exit
